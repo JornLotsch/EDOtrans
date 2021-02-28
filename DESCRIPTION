@@ -8,6 +8,6 @@ Description: A data transformation method which takes into account the special p
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Imports: ABCanalysis, AdaptGauss, DistributionOptimization, ClusterR, pracma, DataVisualizations, ggplot2, grDevices, methods, stats, rlang
+Imports: ABCanalysis, AdaptGauss, DistributionOptimization, ClusterR, DataVisualizations, ggplot2, grDevices, methods, stats, rlang
 Depends: R (>= 3.5.0)
 

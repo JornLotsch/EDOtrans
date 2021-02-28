@@ -1,8 +1,23 @@
 #Cuts a vector into separate bfoups according to input breacks
-#' @importFrom pracma size
+#' @importFrom methods is
 
 cutGMM <- function(x, breaks, right = TRUE) {
-  if (pracma::size(x)[2] > 1 | length(x) == 0)
+  #Sourced from libary pracma
+  sizeX <- function (A)
+  {
+    TA <- is(A)
+    TypeOfA = TA[2]
+    Result = c(NaN, NaN)
+    if (TypeOfA == "vector") {
+      Result = c(length(A), 1)
+    }
+    if (TypeOfA == "array") {
+      Result = dim(A)
+    }
+    return(Result)
+  }
+
+  if (sizeX(x)[2] > 1 | length(x) == 0)
     stop("CutGMM: x should be a single vector of length > 0.")
   if (length(breaks) > 0) {
     if (hasArg(right) == FALSE) {
