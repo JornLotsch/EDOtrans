@@ -2,7 +2,7 @@
 #' @importFrom methods is
 
 cutGMM <- function(x, breaks, right = TRUE) {
-  #Sourced from libary pracma
+  #Sourced from library pracma
   sizeX <- function (A)
   {
     TA <- is(A)
