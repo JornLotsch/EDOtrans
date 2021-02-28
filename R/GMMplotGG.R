@@ -1,4 +1,4 @@
-#Function to plot a Gaussian mixture based on the modle's paramter values
+#Function to plot a Gaussian mixture based on the model's parameter values
 #' @importFrom AdaptGauss BayesDecisionBoundaries
 #' @importFrom grDevices nclass.FD
 #' @importFrom methods hasArg
