@@ -17,7 +17,7 @@ GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE) {
   }
 
   GMMdata <- Data
-  MaxModes <- 5
+  MaxModes <- 10
 
   if (DO == FALSE) {
     #GMM fit using EM
