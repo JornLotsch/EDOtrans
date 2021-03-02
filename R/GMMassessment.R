@@ -23,7 +23,6 @@ GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE) {
     #GMM fit using EM
     list.of.Modes <- 1:MaxModes
     GMMfit <- lapply(1:MaxModes, function(x) {
-      set.seed(42)
       GMMfit_Mode <- ClusterR::GMM(data = data.frame(GMMdata), gaussian_comps = list.of.Modes[x], dist_mode = "eucl_dist")
       GMMfit_Mode_FitGuete <- AdaptGauss::InformationCriteria4GMM(GMMdata,
                                                                   Means = GMMfit_Mode$centroids,
@@ -49,7 +48,7 @@ GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE) {
     {
       assign(
         paste0("GMMfit_Modes", i),
-        DistributionOptimization::DistributionOptimization(Data = GMMdata, Modes = i, Monitor = 0, ErrorMethod = "chisquare", Seed = 42))
+        DistributionOptimization::DistributionOptimization(Data = GMMdata, Modes = i, Monitor = 0, ErrorMethod = "chisquare"))
       assign(
         paste0("GMMfit_Modes", i, "_FitGuete"),
         AdaptGauss::InformationCriteria4GMM(Data = GMMdata,

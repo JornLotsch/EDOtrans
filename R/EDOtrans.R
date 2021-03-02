@@ -16,7 +16,7 @@ EDOtrans <- function(Data, Cls, Means, SDs, Weights, DO = FALSE, PlotGMM = FALSE
   #Obtain standard deviations
   if (hasArg("Means") == TRUE & hasArg("SDs") == TRUE & hasArg("Weights") == TRUE) {
     if (length(c(Means, SDs, Weights)) %% 3 != 0)
-      stop("CreateGMM: Unequal number of modes in parameters.")
+      stop("EDOtrans: Unequal number of modes in parameters.")
     Means0 <- Means
     SDs0 <- SDs
     Weights0 <- Weights
