@@ -1,5 +1,4 @@
 #Calculates parameters of combined Gaussian modes
-
 combinedModesParameters <- function(Means, SDs, Weights, n) {
   Means0 <- Means[order(Means)]
   SDs0 <- SDs[order(Means)]
