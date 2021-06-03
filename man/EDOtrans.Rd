@@ -23,7 +23,7 @@ EDOtrans(Data, Cls, Means, SDs, Weights, DO = FALSE, PlotGMM = FALSE)
  \item{Cls}{the class information for each data instance.}
  }
 \references{
- Lotsch, J. (2021): 
+ Lotsch, J., Ultsch, A. (2021):
  EDOtrans -- an R Package for Euclidean distance-optimized data transformation.
 }
 \author{
@@ -32,7 +32,7 @@ EDOtrans(Data, Cls, Means, SDs, Weights, DO = FALSE, PlotGMM = FALSE)
 \examples{
 ## example 1
 data(iris)
-IrisEDOdata <- EDOtrans(as.vector(iris[,1]), as.integer(iris$Species), PlotGMM = TRUE) 
+IrisEDOdata <- EDOtrans(as.vector(iris[,1]), as.integer(iris$Species), PlotGMM = TRUE)
 }
 \keyword{EDOtrans}
 \keyword{data transformation}

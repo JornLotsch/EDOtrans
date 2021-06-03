@@ -1,6 +1,5 @@
 #Cuts a vector into separate groups according to input breaks
 #' @importFrom methods is
-
 cutGMM <- function(x, breaks, right = TRUE) {
   sizeX <- function (A)
   {
