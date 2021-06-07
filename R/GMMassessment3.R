@@ -109,8 +109,8 @@ GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE, Criterion = "LR", Max
     for (i in 2:MaxModes) {
       LRp <- AdaptGauss::LikelihoodRatio4Mixtures(
                 Data = GMMdata,
-                NullMixture = lapply(GMMfit, "[[", 2)[[i]],
-                OneMixture = lapply(GMMfit, "[[", 2)[[i + 1]],
+                NullMixture = lapply(GMMfit, "[[", 2)[[i - 1]],
+                OneMixture = lapply(GMMfit, "[[", 2)[[i]],
                 PlotIt = FALSE
               )$Pvalue
       if (LRp < 0.05)
@@ -120,9 +120,15 @@ GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE, Criterion = "LR", Max
     }
   })
 
-  Means = as.vector(GMMfit[[BestGMM]][[1]]$centroids)
-  SDs = sqrt(as.vector(GMMfit[[BestGMM]][[1]]$covariance_matrices))
-  Weights = as.vector(GMMfit[[BestGMM]][[1]]$weights)
+  if (DO == FALSE) {
+    Means = as.vector(GMMfit[[BestGMM]][[1]]$centroids)
+    SDs = sqrt(as.vector(GMMfit[[BestGMM]][[1]]$covariance_matrices))
+    Weights = as.vector(GMMfit[[BestGMM]][[1]]$weights)
+  } else {
+    Means = as.vector(GMMfit[[BestGMM]][[1]]$Means)
+    SDs = as.vector(GMMfit[[BestGMM]][[1]]$SDs)
+    Weights = as.vector(GMMfit[[BestGMM]][[1]]$Weights)
+  }
 
   #Calculate Bayes boundaries
   Boundaries <- c()

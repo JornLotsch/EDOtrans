@@ -68,7 +68,7 @@ GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE, Criterion = "BIC", Ma
     },
             LR = {
       BestGMM <- 1
-      for (i in 2:MaxModes) {
+      for (i in 1:(MaxModes - 1)) {
         LRp <- AdaptGauss::LikelihoodRatio4Mixtures(
                   Data = GMMdata,
                   NullMixture = lapply(GMMfit, "[[", 2)[[i]],
