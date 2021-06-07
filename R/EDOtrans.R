@@ -8,8 +8,7 @@
 EDOtrans <- function(Data, Cls, Means, SDs, Weights, DO = FALSE, PlotGMM = FALSE) {
   if (hasArg("Data") == FALSE)
     stop("EDOtrans: No data provided. Stopping.")
-  is.integer0 <- function(x)
-  {
+  is.integer0 <- function(x) {
     is.integer(x) && length(x) == 0L
   }
 
@@ -36,16 +35,16 @@ EDOtrans <- function(Data, Cls, Means, SDs, Weights, DO = FALSE, PlotGMM = FALSE
       if (length(Cls) != length(Data)) {
         stop("EDOtrans: Unequal legths of Data and Cls.")
       } else {
-        Means0 <- tapply(X = Data, INDEX =  Cls, FUN = mean)
-        SDs0 <- tapply(X = Data, INDEX =  Cls, FUN = sd)
-        Weights0 <- tapply(X = Data, INDEX =  Cls, function(x) length(x) / length(Data))
+        Means0 <- tapply(X = Data, INDEX = Cls, FUN = mean)
+        SDs0 <- tapply(X = Data, INDEX = Cls, FUN = sd)
+        Weights0 <- tapply(X = Data, INDEX = Cls, function(x) length(x) / length(Data))
       }
     } else {
       #Obtain classes via GMM
       warning("EDOtrans: Classes created using Gaussian mixtures.", call. = FALSE)
       if (hasArg("DO") == TRUE) DO = DO else DO = FALSE
       if (hasArg("PlotGMM") == TRUE) PlotGMM = PlotGMM else PlotGMM = FALSE
-      GMMresults  <- GMMasessment(Data = Data, DO = DO, PlotIt = PlotGMM)
+      GMMresults <- GMMasessment(Data = Data, DO = DO, PlotIt = PlotGMM)
       Cls <- GMMresults$Cls
       Means0 <- GMMresults$Means
       SDs0 <- GMMresults$SDs
