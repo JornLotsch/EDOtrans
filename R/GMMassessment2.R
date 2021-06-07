@@ -6,7 +6,7 @@
 #' @importFrom methods hasArg
 #' @importFrom stats dnorm median na.omit sd
 #' @importFrom DistributionOptimization DistributionOptimization
-GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE, Criterion = "LR", MaxModes = 10) {
+GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE, Criterion = "BIC", MaxModes = 10) {
   if (!hasArg("Data"))
     stop("GMMasessment: No data.")
   if (length(Data) < 2)

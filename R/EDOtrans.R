@@ -5,7 +5,7 @@
 #' @importFrom stats dnorm median na.omit sd
 #' @importFrom DistributionOptimization DistributionOptimization
 #' @export
-EDOtrans <- function(Data, Cls, Means, SDs, Weights, DO = FALSE, PlotGMM = FALSE) {
+EDOtrans <- function(Data, Cls, Means, SDs, Weights, DO = FALSE, GMMCriterion = "BIC", GMMMaxModes = 10, PlotGMM = FALSE) {
   if (hasArg("Data") == FALSE)
     stop("EDOtrans: No data provided. Stopping.")
   is.integer0 <- function(x) {
@@ -44,7 +44,7 @@ EDOtrans <- function(Data, Cls, Means, SDs, Weights, DO = FALSE, PlotGMM = FALSE
       warning("EDOtrans: Classes created using Gaussian mixtures.", call. = FALSE)
       if (hasArg("DO") == TRUE) DO = DO else DO = FALSE
       if (hasArg("PlotGMM") == TRUE) PlotGMM = PlotGMM else PlotGMM = FALSE
-      GMMresults <- GMMasessment(Data = Data, DO = DO, PlotIt = PlotGMM)
+      GMMresults <- GMMasessment(Data = Data, DO = DO, PlotIt = PlotGMM, Criterion = GMMCriterion, MaxModes = GMMMaxModes)
       Cls <- GMMresults$Cls
       Means0 <- GMMresults$Means
       SDs0 <- GMMresults$SDs
