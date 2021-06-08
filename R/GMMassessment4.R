@@ -2,13 +2,13 @@
 #Statistical justification using likelihood ratio tests of GMM_M versus GMM_M-1
 #' @importFrom ClusterR GMM
 #' @importFrom parallel detectCores mclapply
-#' @importFrom AdaptGauss InformationCriteria4GMM LikelihoodRatio4Mixtures
+#' @importFrom AdaptGauss InformationCriteria4GMM LikelihoodRatio4Mixtures KStestMixtures
 #' @importFrom grDevices nclass.FD
 #' @importFrom methods hasArg
 #' @importFrom stats dnorm median na.omit sd
 #' @importFrom DistributionOptimization DistributionOptimization
 GMMasessment <-
-  function(Data, DO = FALSE, PlotIt = FALSE, Criterion = "LR", MaxModes = 10, Seed) {
+  function(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", MaxModes = 10, Seed) {
     if (!hasArg("Data"))
       stop("GMMasessment: No data.")
     if (length(Data) < 2)
@@ -68,7 +68,6 @@ GMMasessment <-
 
       #GMM fit using a genetic algorithm
       GMMfit <- mclapply(list.of.Modes[1:DOmcMaxModes], function(x) {
-        set.seed(ActualSeed)
         GMMfit_Mode <-
           DistributionOptimization::DistributionOptimization(
             Data = GMMdata,
@@ -94,7 +93,6 @@ GMMasessment <-
       } else {
         #GMM fit using a genetic algorithm
         GMMfit <- lapply(list.of.Modes[1:DOmcMaxModes], function(x) {
-          set.seed(ActualSeed)
           GMMfit_Mode <-
             DistributionOptimization::DistributionOptimization(
               Data = GMMdata,
@@ -194,6 +192,12 @@ GMMasessment <-
         Classes <- cutGMM(x = GMMdata, breaks = Boundaries)
     }
 
+    #Do Kolmogorov-Smirnov test
+    if (KS == TRUE) {
+      KStest <- AdaptGauss::KStestMixtures(Means = Means, SDs = SDs, Weights = Weights, Silent = TRUE)
+    } else
+      KStest <- NA
+
     #Prepare plot
     p1 <- GMMplotGG(Data = Data, Means = Means, SDs = SDs, Weights = Weights, Hist = TRUE)
     if (PlotIt == TRUE)
@@ -205,7 +209,8 @@ GMMasessment <-
         SDs = SDs,
         Weights = Weights,
         Boundaries = Boundaries,
-        Plot = p1
+        Plot = p1,
+        KS = KStest
       )
     )
   }

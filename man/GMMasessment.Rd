@@ -5,12 +5,13 @@
   The function fits a Gaussian mixture and determines the number of statistically supported modes.
 }
 \usage{
-GMMasessment(Data, DO = FALSE, PlotIt = FALSE, Criterion = "LR", MaxModes = 10, Seed)
+GMMasessment(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", MaxModes = 10, Seed)
 }
 \arguments{
  \item{Data}{the data as a vector.}
  \item{DO}{use the genetic algorithm distribution optimization or EM based GMM fitting.}
  \item{PlotIt}{whether to plot the fit.}
+ \item{KS}{perform a Kolmogorov-Smirnov test of the fit versus orginal distribution.}
  \item{Criterion}{criterion for mode number selection, likelihood ratio test LR, AIC or BIC.}
  \item{MaxModes}{the maximum number of modes to be tried.}
  \item{Seed}{seed parameter set internally.}
@@ -22,6 +23,8 @@ GMMasessment(Data, DO = FALSE, PlotIt = FALSE, Criterion = "LR", MaxModes = 10, 
  \item{SDs}{standard deviations of the Gaussian modes.}
  \item{Weights}{weights of the Gaussian modes.}
  \item{Boundaries}{Bayesian boundaries between the Gaussian modes.}
+ \item{plot}{Plot of the ombtained mixture.}
+ \item{KS}{Results of the Kolmogorov-Smirnov test.}
  }
 \references{
  Lotsch, J. (2021): 

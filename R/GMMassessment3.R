@@ -3,7 +3,7 @@
 #' @importFrom ClusterR GMM
 #' @importFrom parallel detectCores
 #' @importFrom pbmcapply pbmclapply
-#' @importFrom AdaptGauss InformationCriteria4GMM LikelihoodRatio4Mixtures
+#' @importFrom AdaptGauss InformationCriteria4GMM LikelihoodRatio4Mixtures KStestMixtures
 #' @importFrom grDevices nclass.FD
 #' @importFrom methods hasArg
 #' @importFrom stats dnorm median na.omit sd
@@ -152,6 +152,12 @@ GMMasessment <-
         Classes <- cutGMM(x = GMMdata, breaks = Boundaries)
     }
 
+    #Do Kolmogorov-Smirnov test
+    if (KS == TRUE) {
+      KStest <- AdaptGauss::KStestMixtures(Means = Means, SDs = SDs, Weights = Weights, Silent = TRUE)
+    } else
+      KStest <- NA
+
     #Prepare plot
     p1 <- GMMplotGG(Data = Data, Means = Means, SDs = SDs, Weights = Weights, Hist = TRUE)
     if (PlotIt == TRUE)
@@ -163,7 +169,8 @@ GMMasessment <-
         SDs = SDs,
         Weights = Weights,
         Boundaries = Boundaries,
-        Plot = p1
-      )
+        Plot = p1,
+        KS = KStest
+        )
     )
   }

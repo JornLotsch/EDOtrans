@@ -6,7 +6,7 @@ importFrom("methods", "hasArg", "is")
 importFrom("stats", "dnorm", "median", "na.omit", "sd")
 importFrom("ClusterR", "GMM")
 importFrom("parallel", "detectCores", "mclapply"
-importFrom("AdaptGauss", "InformationCriteria4GMM")
+importFrom("AdaptGauss", "InformationCriteria4GMM", "LikelihoodRatio4Mixtures", "KStestMixtures")
 importFrom("grDevices", "nclass.FD")
 importFrom("methods", "hasArg")
 importFrom("stats", "dnorm", "median", "na.omit", "sd")

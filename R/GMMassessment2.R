@@ -1,7 +1,7 @@
 #Analysis of a Gaussian mixture structure in the data
 #Statistical justification using likelihood ratio tests of GMM_M versus GMM_M-1
 #' @importFrom ClusterR GMM
-#' @importFrom AdaptGauss InformationCriteria4GMM LikelihoodRatio4Mixtures
+#' @importFrom AdaptGauss InformationCriteria4GMM LikelihoodRatio4Mixtures KStestMixtures
 #' @importFrom grDevices nclass.FD
 #' @importFrom methods hasArg
 #' @importFrom stats dnorm median na.omit sd
@@ -166,6 +166,12 @@ GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE, Criterion = "BIC", Ma
     }
   }
 
+  #Do Kolmogorov-Smirnov test
+  if (KS == TRUE) {
+    KStest <- AdaptGauss::KStestMixtures(Means = Means, SDs = SDs, Weights = Weights, Silent = TRUE)
+  } else
+    KStest <- NA
+
   #Prepare plot
   p1 <- GMMplotGG(Data = Data, Means = Means, SDs = SDs, Weights = Weights, Hist = TRUE)
   if (PlotIt == TRUE)
@@ -177,7 +183,8 @@ GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE, Criterion = "BIC", Ma
       SDs = SDs,
       Weights = Weights,
       Boundaries = Boundaries,
-      Plot = p1
+      Plot = p1,
+      KS = KStest
     )
   )
 }
