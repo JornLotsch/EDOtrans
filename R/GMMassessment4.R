@@ -1,8 +1,7 @@
 #Analysis of a Gaussian mixture structure in the data
 #Statistical justification using likelihood ratio tests of GMM_M versus GMM_M-1
 #' @importFrom ClusterR GMM
-#' @importFrom parallel detectCores
-#' @importFrom pbmcapply pbmclapply
+#' @importFrom parallel detectCores mclapply
 #' @importFrom AdaptGauss InformationCriteria4GMM LikelihoodRatio4Mixtures
 #' @importFrom grDevices nclass.FD
 #' @importFrom methods hasArg
@@ -37,8 +36,8 @@ GMMasessment <-
       })
       AICBIC <- unlist(lapply(1:length(GMMfit), function(x) {
         switch(Criterion,
-               AIC = {AICBIC <- AICBIC[[x]]$AIC},
-               BIC = {AICBIC <- AICBIC[[x]]$BIC})
+               AIC = { AICBIC <- AICBIC[[x]]$AIC },
+               BIC = { AICBIC <- AICBIC[[x]]$BIC })
         return(AICBIC)
       }))
       BestGMM <- 1
@@ -113,23 +112,23 @@ GMMasessment <-
 
     #Identify best fit based on selected criterion
     switch(Criterion,
-           BIC = {BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion)},
-           AIC = {BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion)},
+           BIC = { BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion) },
+           AIC = { BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion) },
            LR = {
-             BestGMM <- 1
-             for (i in 2:length(GMMfit)) {
-               LRp <- AdaptGauss::LikelihoodRatio4Mixtures(
+      BestGMM <- 1
+      for (i in 2:length(GMMfit)) {
+        LRp <- AdaptGauss::LikelihoodRatio4Mixtures(
                  Data = GMMdata,
                  NullMixture = lapply(GMMfit, "[[", 2)[[i - 1]],
                  OneMixture = lapply(GMMfit, "[[", 2)[[i]],
                  PlotIt = FALSE
                )$Pvalue
-               if (LRp < 0.05)
-                 BestGMM <- i
-               else
-                 break
-             }
-           })
+        if (LRp < 0.05)
+          BestGMM <- i
+        else
+          break
+      }
+    })
 
     #Do further DO fits until no more improvement
     if (DO == TRUE & BestGMM >= DOmcMaxModes) {
@@ -150,23 +149,23 @@ GMMasessment <-
         GMMfit <- c(GMMfit, GMMfitNext)
         BestGMMac <- BestGMM
         switch(Criterion,
-               BIC = {BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion)},
-               AIC = {BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion)},
+               BIC = { BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion) },
+               AIC = { BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion) },
                LR = {
-                 BestGMM <- 1
-                 for (i in 2:DOmcMaxModes) {
-                   LRp <- AdaptGauss::LikelihoodRatio4Mixtures(
+          BestGMM <- 1
+          for (i in 2:DOmcMaxModes) {
+            LRp <- AdaptGauss::LikelihoodRatio4Mixtures(
                      Data = GMMdata,
                      NullMixture = lapply(GMMfit, "[[", 2)[[i - 1]],
                      OneMixture = lapply(GMMfit, "[[", 2)[[i]],
                      PlotIt = FALSE
                    )$Pvalue
-                   if (LRp < 0.05)
-                     BestGMM <- i
-                   else
-                     break
-                 }
-               })
+            if (LRp < 0.05)
+              BestGMM <- i
+            else
+              break
+          }
+        })
         if (BestGMM > BestGMMac)
           BestBMM <- BestGMMac
         else

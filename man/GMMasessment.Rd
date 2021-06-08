@@ -1,0 +1,40 @@
+\name{GMMasessment}
+\alias{GMMasessment}
+\title{Gaussian mixture assessment}
+\description{
+  The function fits a Gaussian mixture and determines the number of statistically supported modes.
+}
+\usage{
+GMMasessment(Data, DO = FALSE, PlotIt = FALSE, Criterion = "LR", MaxModes = 10, Seed)
+}
+\arguments{
+ \item{Data}{the data as a vector.}
+ \item{DO}{use the genetic algorithm distribution optimization or EM based GMM fitting.}
+ \item{PlotIt}{whether to plot the fit.}
+ \item{Criterion}{criterion for mode number selection, likelihood ratio test LR, AIC or BIC.}
+ \item{MaxModes}{the maximum number of modes to be tried.}
+ \item{Seed}{seed parameter set internally.}
+}
+\value{
+  Returns a list of Gaussian modes.
+ \item{Cls}{the classes to which the cases are assigned according to the Gaussian mode membership.}
+ \item{Means}{means of the Gaussian modes.}
+ \item{SDs}{standard deviations of the Gaussian modes.}
+ \item{Weights}{weights of the Gaussian modes.}
+ \item{Boundaries}{Bayesian boundaries between the Gaussian modes.}
+ }
+\references{
+ Lotsch, J. (2021): 
+ EDOtrans -- an R Package for Euclidean distance-optimized data transformation.
+}
+\author{
+  Jorn Lotsch and Alfred Ultsch
+}
+\examples{
+## example 1
+data(iris)
+GMMasessment(Data = iris$Sepal.Length, DO = F, PlotIt = T, Criterion = "LR", MaxModes = 5, Seed = 42)
+}
+\keyword{EDOtrans}
+\keyword{GMMasessment}
+\keyword{data visualization}

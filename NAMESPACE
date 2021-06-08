@@ -1,9 +1,11 @@
 export(EDOtrans)
 export(GMMplotGG)
+export(GMMasessment)
 importFrom("grDevices", "nclass.FD")
 importFrom("methods", "hasArg", "is")
 importFrom("stats", "dnorm", "median", "na.omit", "sd")
 importFrom("ClusterR", "GMM")
+importFrom("parallel", "detectCores", "mclapply"
 importFrom("AdaptGauss", "InformationCriteria4GMM")
 importFrom("grDevices", "nclass.FD")
 importFrom("methods", "hasArg")

@@ -19,7 +19,7 @@ GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE, Criterion = "BIC", Ma
   if (!missing(Seed)) {
     ActualSeed <- Seed
   } else {
-    ActualSeed <- tail(get('.Random.seed', envir=globalenv()), 1)
+    ActualSeed <- tail(get('.Random.seed', envir = globalenv()), 1)
   }
 
   idBestGMM <- function(GMMdata, GMMfit, Criterion) {
@@ -34,8 +34,8 @@ GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE, Criterion = "BIC", Ma
     })
     AICBIC <- unlist(lapply(1:length(GMMfit), function(x) {
       switch(Criterion,
-             AIC = {AICBIC <- AICBIC[[x]]$AIC},
-             BIC = {AICBIC <- AICBIC[[x]]$BIC})
+             AIC = { AICBIC <- AICBIC[[x]]$AIC },
+             BIC = { AICBIC <- AICBIC[[x]]$BIC })
       return(AICBIC)
     }))
     BestGMM <- 1
@@ -63,23 +63,23 @@ GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE, Criterion = "BIC", Ma
 
     #Identify best fit based on selected criterion
     switch(Criterion,
-           BIC = {BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion)},
-           AIC = {BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion)},
+           BIC = { BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion) },
+           AIC = { BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion) },
            LR = {
-             BestGMM <- 1
-             for (i in 2:MaxModes) {
-               LRp <- AdaptGauss::LikelihoodRatio4Mixtures(
+      BestGMM <- 1
+      for (i in 2:MaxModes) {
+        LRp <- AdaptGauss::LikelihoodRatio4Mixtures(
                  Data = GMMdata,
                  NullMixture = lapply(GMMfit, "[[", 2)[[i - 1]],
                  OneMixture = lapply(GMMfit, "[[", 2)[[i]],
                  PlotIt = FALSE
                )$Pvalue
-               if (LRp < 0.05)
-                 BestGMM <- i
-               else
-                 break
-             }
-           })
+        if (LRp < 0.05)
+          BestGMM <- i
+        else
+          break
+      }
+    })
 
     Means <- as.vector(GMMfit[[BestGMM]][[1]]$centroids)
     SDs <- sqrt(as.vector(GMMfit[[BestGMM]][[1]]$covariance_matrices))
@@ -116,37 +116,37 @@ GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE, Criterion = "BIC", Ma
       } else {
         switch(Criterion,
                BIC = {
-                 if (get(paste0("GMMfit_Modes", i, "_FitGuete"))$BIC < BICGMM) {
-                   BICGMM <- get(paste0("GMMfit_Modes", i, "_FitGuete"))$BIC
-                   BestGMM <- i
-                 } else
-                   break
-               },
+          if (get(paste0("GMMfit_Modes", i, "_FitGuete"))$BIC < BICGMM) {
+            BICGMM <- get(paste0("GMMfit_Modes", i, "_FitGuete"))$BIC
+            BestGMM <- i
+          } else
+            break
+        },
                AIC = {
-                 if (get(paste0("GMMfit_Modes", i, "_FitGuete"))$AIC < AICGMM) {
-                   AICGMM <- get(paste0("GMMfit_Modes", i, "_FitGuete"))$AIC
-                   BestGMM <- i
-                 } else
-                   break
-               },
+        if (get(paste0("GMMfit_Modes", i, "_FitGuete"))$AIC < AICGMM) {
+          AICGMM <- get(paste0("GMMfit_Modes", i, "_FitGuete"))$AIC
+          BestGMM <- i
+        } else
+          break
+      },
                LR = {
-                 NullMixture = cbind(get(paste0("GMMfit_Modes", i - 1))$Means,
+      NullMixture = cbind(get(paste0("GMMfit_Modes", i - 1))$Means,
                                      get(paste0("GMMfit_Modes", i - 1))$SDs,
                                      get(paste0("GMMfit_Modes", i - 1))$Weights)
-                 OneMixture = cbind(get(paste0("GMMfit_Modes", i))$Means,
+      OneMixture = cbind(get(paste0("GMMfit_Modes", i))$Means,
                                     get(paste0("GMMfit_Modes", i))$SDs,
                                     get(paste0("GMMfit_Modes", i))$Weights)
-                 LRp <- AdaptGauss::LikelihoodRatio4Mixtures(
+      LRp <- AdaptGauss::LikelihoodRatio4Mixtures(
                    Data = GMMdata,
                    NullMixture = NullMixture,
                    OneMixture = OneMixture,
                    PlotIt = FALSE
                  )$Pvalue
-                 if (LRp < 0.05)
-                   BestGMM <- i
-                 else
-                   break
-               })
+      if (LRp < 0.05)
+        BestGMM <- i
+      else
+        break
+    })
       }
       Means <- get(paste0("GMMfit_Modes", BestGMM))$Means
       SDs <- get(paste0("GMMfit_Modes", BestGMM))$SDs
