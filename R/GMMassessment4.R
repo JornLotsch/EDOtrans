@@ -15,10 +15,11 @@ GMMasessment <-
     if (length(Data) < 2)
       stop("GMMasessment: Too few data.")
 
-    if (!missing(Seed))
+    if (!missing(Seed)) {
       ActualSeed <- Seed
-    else
+    } else {
       ActualSeed <- tail(get('.Random.seed', envir = globalenv()), 1)
+    }
 
     is.integer0 <- function(x) {
       is.integer(x) && length(x) == 0L
@@ -53,11 +54,11 @@ GMMasessment <-
     GMMdata <- Data
     MaxModes <- MaxModes
     list.of.Modes <- 1:MaxModes
+    DOmcMaxModes <- min(2, MaxModes)
 
     #Do the GMM fit
     if (.Platform$OS.type != "windows" & MaxModes > 1 & DO == TRUE) {
       require("parallel")
-      require("pbmcapply")
       chk <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
       if (nzchar(chk) && chk == "TRUE") {
         num_workers <- 2L
@@ -67,7 +68,8 @@ GMMasessment <-
       nProc <- min(num_workers - 1, MaxModes)
 
       #GMM fit using a genetic algorithm
-      GMMfit <- pbmclapply(list.of.Modes, function(x) {
+      GMMfit <- mclapply(list.of.Modes[1:DOmcMaxModes], function(x) {
+        set.seed(ActualSeed)
         GMMfit_Mode <-
           DistributionOptimization::DistributionOptimization(
             Data = GMMdata,
@@ -79,23 +81,21 @@ GMMasessment <-
           )
         Mixtures <- cbind(GMMfit_Mode$Means, GMMfit_Mode$SDs, GMMfit_Mode$Weights)
         return(list(GMMfit_Mode, Mixtures))
-      }, mc.cores = nProc)
+      }, mc.cores = DOmcMaxModes)
     } else {
       if (DO == FALSE) {
         #GMM fit using EM
         GMMfit <- lapply(list.of.Modes, function(x) {
+          set.seed(ActualSeed)
           GMMfit_Mode <-
-            ClusterR::GMM(
-              data = data.frame(GMMdata),
-              gaussian_comps = list.of.Modes[x],
-              dist_mode = "eucl_dist"
-            )
+            ClusterR::GMM(data = data.frame(GMMdata), gaussian_comps = list.of.Modes[x], dist_mode = "eucl_dist")
           Mixtures <- cbind(GMMfit_Mode$centroids, sqrt(GMMfit_Mode$covariance_matrices), GMMfit_Mode$weights)
           return(list(GMMfit_Mode, Mixtures))
         })
       } else {
         #GMM fit using a genetic algorithm
-        GMMfit <- lapply(list.of.Modes, function(x) {
+        GMMfit <- lapply(list.of.Modes[1:DOmcMaxModes], function(x) {
+          set.seed(ActualSeed)
           GMMfit_Mode <-
             DistributionOptimization::DistributionOptimization(
               Data = GMMdata,
@@ -117,7 +117,7 @@ GMMasessment <-
            AIC = {BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion)},
            LR = {
              BestGMM <- 1
-             for (i in 2:MaxModes) {
+             for (i in 2:length(GMMfit)) {
                LRp <- AdaptGauss::LikelihoodRatio4Mixtures(
                  Data = GMMdata,
                  NullMixture = lapply(GMMfit, "[[", 2)[[i - 1]],
@@ -130,6 +130,49 @@ GMMasessment <-
                  break
              }
            })
+
+    #Do further DO fits until no more improvement
+    if (DO == TRUE & BestGMM >= DOmcMaxModes) {
+      for (i in (DOmcMaxModes + 1):MaxModes) {
+        GMMfitNext <- lapply(list.of.Modes[i], function(x) {
+          GMMfit_Mode <-
+            DistributionOptimization::DistributionOptimization(
+              Data = GMMdata,
+              Modes = list.of.Modes[x],
+              Monitor = 0,
+              CrossoverRate = .9,
+              ErrorMethod = "chisquare",
+              Seed = ActualSeed
+            )
+          Mixtures <- cbind(GMMfit_Mode$Means, GMMfit_Mode$SDs, GMMfit_Mode$Weights)
+          return(list(GMMfit_Mode, Mixtures))
+        })
+        GMMfit <- c(GMMfit, GMMfitNext)
+        BestGMMac <- BestGMM
+        switch(Criterion,
+               BIC = {BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion)},
+               AIC = {BestGMM <- idBestGMM(GMMdata, GMMfit, Criterion)},
+               LR = {
+                 BestGMM <- 1
+                 for (i in 2:DOmcMaxModes) {
+                   LRp <- AdaptGauss::LikelihoodRatio4Mixtures(
+                     Data = GMMdata,
+                     NullMixture = lapply(GMMfit, "[[", 2)[[i - 1]],
+                     OneMixture = lapply(GMMfit, "[[", 2)[[i]],
+                     PlotIt = FALSE
+                   )$Pvalue
+                   if (LRp < 0.05)
+                     BestGMM <- i
+                   else
+                     break
+                 }
+               })
+        if (BestGMM > BestGMMac)
+          BestBMM <- BestGMMac
+        else
+          break
+      }
+    }
 
     if (DO == FALSE) {
       Means <- as.vector(GMMfit[[BestGMM]][[1]]$centroids)
