@@ -60,7 +60,7 @@ GMMasessment <-
             n = 1000
           )$Data
         Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-        KSfirst <- ks.test(x = GMMdata, y = Pred)
+        KSfirst <- ks.test(x = GMMdata, y = Pred)$statistic
 
         set.seed(ActualSeed)
         Pred <-
@@ -71,7 +71,7 @@ GMMasessment <-
             n = 1000
           )$Data
         Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-        KSmin <- ks.test(x = GMMdata, y = Pred)
+        KSmin <- ks.test(x = GMMdata, y = Pred)$statistic
 
         if (KSfirst < KSmin)
           BestGMM <- firstBestGMM
@@ -122,7 +122,7 @@ GMMasessment <-
             n = 1000
           )$Data
         Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-        KSfirst <- ks.test(x = GMMdata, y = Pred)
+        KSfirst <- ks.test(x = GMMdata, y = Pred)$statistic
 
         set.seed(ActualSeed)
         Pred <-
@@ -133,7 +133,7 @@ GMMasessment <-
             n = 1000
           )$Data
         Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-        KSmin <- ks.test(x = GMMdata, y = Pred)
+        KSmin <- ks.test(x = GMMdata, y = Pred)$statistic
 
         if (KSfirst < KSmin)
           BestGMM <- firstBestGMM
