@@ -168,12 +168,12 @@ GMMasessment <- function(Data, DO = FALSE, PlotIt = FALSE, Criterion = "BIC", Ma
 
   #Do Kolmogorov-Smirnov test
   if (KS == TRUE) {
-    KStest <- AdaptGauss::KStestMixtures(Means = Means, SDs = SDs, Weights = Weights, Silent = TRUE)
+    KStest <- AdaptGauss::KStestMixtures(Data = GMMdata, Means = Means, SDs = SDs, Weights = Weights, Silent = TRUE)
   } else
     KStest <- NA
 
   #Prepare plot
-  p1 <- GMMplotGG(Data = Data, Means = Means, SDs = SDs, Weights = Weights, Hist = TRUE)
+  p1 <- GMMplotGG(Data = GMMdata, Means = Means, SDs = SDs, Weights = Weights, Hist = TRUE)
   if (PlotIt == TRUE)
     print(p1)
   return(

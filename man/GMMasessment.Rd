@@ -9,7 +9,7 @@ GMMasessment(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", Max
 }
 \arguments{
  \item{Data}{the data as a vector.}
- \item{DO}{use the genetic algorithm distribution optimization or EM based GMM fitting.}
+ \item{DO}{use the genetic algorithm distribution optimization or EM based GMM fitting (better but slow).}
  \item{PlotIt}{whether to plot the fit.}
  \item{KS}{perform a Kolmogorov-Smirnov test of the fit versus orginal distribution.}
  \item{Criterion}{criterion for mode number selection, likelihood ratio test LR, AIC or BIC.}
@@ -23,7 +23,7 @@ GMMasessment(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", Max
  \item{SDs}{standard deviations of the Gaussian modes.}
  \item{Weights}{weights of the Gaussian modes.}
  \item{Boundaries}{Bayesian boundaries between the Gaussian modes.}
- \item{plot}{Plot of the ombtained mixture.}
+ \item{plot}{Plot of the obtained mixture.}
  \item{KS}{Results of the Kolmogorov-Smirnov test.}
  }
 \references{

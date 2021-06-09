@@ -15,10 +15,11 @@ GMMasessment <-
     if (length(Data) < 2)
       stop("GMMasessment: Too few data.")
 
-    if (!missing(Seed))
+    if (!missing(Seed)) {
       ActualSeed <- Seed
-    else
+    } else {
       ActualSeed <- tail(get('.Random.seed', envir = globalenv()), 1)
+    }
 
     is.integer0 <- function(x) {
       is.integer(x) && length(x) == 0L
@@ -154,12 +155,12 @@ GMMasessment <-
 
     #Do Kolmogorov-Smirnov test
     if (KS == TRUE) {
-      KStest <- AdaptGauss::KStestMixtures(Means = Means, SDs = SDs, Weights = Weights, Silent = TRUE)
+      KStest <- AdaptGauss::KStestMixtures(Data = GMMdata, Means = Means, SDs = SDs, Weights = Weights, Silent = TRUE)
     } else
       KStest <- NA
 
     #Prepare plot
-    p1 <- GMMplotGG(Data = Data, Means = Means, SDs = SDs, Weights = Weights, Hist = TRUE)
+    p1 <- GMMplotGG(Data = GMMdata, Means = Means, SDs = SDs, Weights = Weights, Hist = TRUE)
     if (PlotIt == TRUE)
       print(p1)
     return(

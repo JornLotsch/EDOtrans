@@ -1,11 +1,12 @@
 #Analysis of a Gaussian mixture structure in the data
-#Statistical justification using likelihood ratio tests of GMM_M versus GMM_M-1
+#Statistical justification using likelihood ratio tests of GMM_M versus GMM_M-1, or AIC or BIC
 #' @importFrom ClusterR GMM
-#' @importFrom parallel detectCores mclapply
+#' @importFrom parallel detectCores
+#' @importFrom pbmcapply pbmclapply
 #' @importFrom AdaptGauss InformationCriteria4GMM LikelihoodRatio4Mixtures
 #' @importFrom grDevices nclass.FD
 #' @importFrom methods hasArg
-#' @importFrom stats dnorm median na.omit sd
+#' @importFrom stats dnorm median na.omit sd ks.test
 #' @importFrom DistributionOptimization DistributionOptimization
 GMMasessment <-
   function(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", MaxModes = 10, Seed) {
@@ -40,18 +41,50 @@ GMMasessment <-
                BIC = { AICBIC <- AICBIC[[x]]$BIC })
         return(AICBIC)
       }))
-      BestGMM <- 1
+      firstBestGMM <- 1
       for (i in 2:length(GMMfit)) {
         if (AICBIC[i] < AICBIC[i - 1])
-          BestGMM <- i
+          firstBestGMM <- i
         else
           break
       }
+      minBestGMM <- which.min(AICBIC)
+      if (firstBestGMM != minBestGMM) {
+        require("twosamples")
+        set.seed(ActualSeed)
+        Pred <-
+          CreateGMM(
+            Means = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 1],
+            SDs = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 2],
+            Weights = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 3],
+            n = 1000
+          )$Data
+        Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
+        KSfirst <- ks.test(x = GMMdata, y = Pred)
+
+        set.seed(ActualSeed)
+        Pred <-
+          CreateGMM(
+            Means = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 1],
+            SDs = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 2],
+            Weights = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 3],
+            n = 1000
+          )$Data
+        Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
+        KSmin <- ks.test(x = GMMdata, y = Pred)
+
+        if (KSfirst < KSmin)
+          BestGMM <- firstBestGMM
+        else
+          BestGMM <- minBestGMM
+      } else
+        BestGMM <- firstBestGMM
       return(BestGMM)
     }
 
+
     idBestGMM_LR <- function(GMMdata, GMMfit) {
-      LRi <- c(1, unlist(lapply(2:length(GMMfit), function(x) {
+      LRi <- c(1, unlist(lapply(2:MaxModes, function(x) {
         AdaptGauss::LikelihoodRatio4Mixtures(
           Data = GMMdata,
           NullMixture = lapply(GMMfit, "[[", 2)[[x - 1]],
@@ -59,24 +92,68 @@ GMMasessment <-
           PlotIt = FALSE
         )$Pvalue
       })))
-      BestGMM <- 1
+
+      LR1 <- c(1, unlist(lapply(2:MaxModes, function(x) {
+        AdaptGauss::LikelihoodRatio4Mixtures(
+          Data = GMMdata,
+          NullMixture = lapply(GMMfit, "[[", 2)[[1]],
+          OneMixture = lapply(GMMfit, "[[", 2)[[x]],
+          PlotIt = FALSE
+        )$Pvalue
+      })))
+
+      firstBestGMM <- 1
       for (i in 2:length(GMMfit)) {
         if (LRi[i] < 0.05)
-          BestGMM <- i
+          firstBestGMM <- i
         else
           break
       }
+      minBestGMM <- which.min(LR1)
+      if (LR1[minBestGMM] >= 0.05) minBestGMM <- firstBestGMM
+
+      if (firstBestGMM != minBestGMM) {
+        set.seed(ActualSeed)
+        Pred <-
+          CreateGMM(
+            Means = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 1],
+            SDs = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 2],
+            Weights = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 3],
+            n = 1000
+          )$Data
+        Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
+        KSfirst <- ks.test(x = GMMdata, y = Pred)
+
+        set.seed(ActualSeed)
+        Pred <-
+          CreateGMM(
+            Means = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 1],
+            SDs = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 2],
+            Weights = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 3],
+            n = 1000
+          )$Data
+        Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
+        KSmin <- ks.test(x = GMMdata, y = Pred)
+
+        if (KSfirst < KSmin)
+          BestGMM <- firstBestGMM
+        else
+          BestGMM <- minBestGMM
+      } else
+        BestGMM <- firstBestGMM
       return(BestGMM)
     }
+
 
     GMMdata <- Data
     MaxModes <- MaxModes
     list.of.Modes <- 1:MaxModes
-    DOmcMaxModes <- min(2, MaxModes)
 
     #Do the GMM fit
-    if (.Platform$OS.type != "windows" & MaxModes > 1 & DO == TRUE) {
+    if (.Platform$OS.type != "windows" &
+        MaxModes > 1 & DO == TRUE) {
       require("parallel")
+      require("pbmcapply")
       chk <- Sys.getenv("_R_CHECK_LIMIT_CORES_", "")
       if (nzchar(chk) && chk == "TRUE") {
         num_workers <- 2L
@@ -86,7 +163,7 @@ GMMasessment <-
       nProc <- min(num_workers - 1, MaxModes)
 
       #GMM fit using a genetic algorithm
-      GMMfit <- mclapply(list.of.Modes[1:DOmcMaxModes], function(x) {
+      GMMfit <- pbmclapply(list.of.Modes, function(x) {
         GMMfit_Mode <-
           DistributionOptimization::DistributionOptimization(
             Data = GMMdata,
@@ -96,22 +173,33 @@ GMMasessment <-
             ErrorMethod = "chisquare",
             Seed = ActualSeed
           )
-        Mixtures <- cbind(GMMfit_Mode$Means, GMMfit_Mode$SDs, GMMfit_Mode$Weights)
+        Mixtures <-
+          cbind(GMMfit_Mode$Means,
+                GMMfit_Mode$SDs,
+                GMMfit_Mode$Weights)
         return(list(GMMfit_Mode, Mixtures))
-      }, mc.cores = DOmcMaxModes)
+      }, mc.cores = nProc)
     } else {
       if (DO == FALSE) {
         #GMM fit using EM
         GMMfit <- lapply(list.of.Modes, function(x) {
-          set.seed(ActualSeed)
           GMMfit_Mode <-
-            ClusterR::GMM(data = data.frame(GMMdata), gaussian_comps = list.of.Modes[x], dist_mode = "eucl_dist")
-          Mixtures <- cbind(GMMfit_Mode$centroids, sqrt(GMMfit_Mode$covariance_matrices), GMMfit_Mode$weights)
+            ClusterR::GMM(
+              data = data.frame(GMMdata),
+              gaussian_comps = list.of.Modes[x],
+              dist_mode = "eucl_dist"
+            )
+          Mixtures <-
+            cbind(
+              GMMfit_Mode$centroids,
+              sqrt(GMMfit_Mode$covariance_matrices),
+              GMMfit_Mode$weights
+            )
           return(list(GMMfit_Mode, Mixtures))
         })
       } else {
         #GMM fit using a genetic algorithm
-        GMMfit <- lapply(list.of.Modes[1:DOmcMaxModes], function(x) {
+        GMMfit <- lapply(list.of.Modes, function(x) {
           GMMfit_Mode <-
             DistributionOptimization::DistributionOptimization(
               Data = GMMdata,
@@ -121,7 +209,10 @@ GMMasessment <-
               ErrorMethod = "chisquare",
               Seed = ActualSeed
             )
-          Mixtures <- cbind(GMMfit_Mode$Means, GMMfit_Mode$SDs, GMMfit_Mode$Weights)
+          Mixtures <-
+            cbind(GMMfit_Mode$Means,
+                  GMMfit_Mode$SDs,
+                  GMMfit_Mode$Weights)
           return(list(GMMfit_Mode, Mixtures))
         })
       }
@@ -132,35 +223,6 @@ GMMasessment <-
            BIC = { BestGMM <- idBestGMM_AICBIC(GMMdata, GMMfit, Criterion) },
            AIC = { BestGMM <- idBestGMM_AICBIC(GMMdata, GMMfit, Criterion) },
            LR = { BestGMM <- idBestGMM_LR(GMMdata, GMMfit) })
-
-    #Do further DO fits until no more improvement
-    if (DO == TRUE & BestGMM >= DOmcMaxModes) {
-      for (i in (DOmcMaxModes + 1):MaxModes) {
-        GMMfitNext <- lapply(list.of.Modes[i], function(x) {
-          GMMfit_Mode <-
-            DistributionOptimization::DistributionOptimization(
-              Data = GMMdata,
-              Modes = list.of.Modes[x],
-              Monitor = 0,
-              CrossoverRate = .9,
-              ErrorMethod = "chisquare",
-              Seed = ActualSeed
-            )
-          Mixtures <- cbind(GMMfit_Mode$Means, GMMfit_Mode$SDs, GMMfit_Mode$Weights)
-          return(list(GMMfit_Mode, Mixtures))
-        })
-        GMMfit <- c(GMMfit, GMMfitNext)
-        BestGMMac <- BestGMM
-        switch(Criterion,
-               BIC = { BestGMM <- idBestGMM_AICBIC(GMMdata, GMMfit, Criterion) },
-               AIC = { BestGMM <- idBestGMM_AICBIC(GMMdata, GMMfit, Criterion) },
-               LR = { BestGMM <- idBestGMM_LR(GMMdata, GMMfit) })
-        if (BestGMM > BestGMMac)
-          BestBMM <- BestGMMac
-        else
-          break
-      }
-    }
 
     if (DO == FALSE) {
       Means <- as.vector(GMMfit[[BestGMM]][[1]]$centroids)
@@ -176,9 +238,13 @@ GMMasessment <-
     Boundaries <- c()
     Classes <- rep(1, length(GMMdata))
     if (BestGMM > 1) {
-      Boundaries <- AdaptGauss::BayesDecisionBoundaries(Means = Means, SDs = SDs, Weights = Weights)
+      Boundaries <-
+        AdaptGauss::BayesDecisionBoundaries(Means = Means,
+                                            SDs = SDs,
+                                            Weights = Weights)
       if (is.integer0(Boundaries) == FALSE)
-        Boundaries <- Boundaries[Boundaries >= min(Means) & Boundaries <= max(Means)]
+        Boundaries <-
+          Boundaries[Boundaries >= min(Means) & Boundaries <= max(Means)]
       if (length(Boundaries) > 0)
         Classes <- cutGMM(x = GMMdata, breaks = Boundaries)
     }
@@ -199,7 +265,8 @@ GMMasessment <-
       KStest <- NA
 
     #Prepare plot
-    p1 <- GMMplotGG(Data = GMMdata, Means = Means, SDs = SDs, Weights = Weights, Hist = TRUE)
+    p1 <-
+      GMMplotGG(Data = GMMdata, Means = Means, SDs = SDs, Weights = Weights, Hist = TRUE)
     if (PlotIt == TRUE)
       print(p1)
     return(
