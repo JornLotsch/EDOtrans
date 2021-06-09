@@ -5,7 +5,7 @@
   The function fits a Gaussian mixture and determines the number of statistically supported modes.
 }
 \usage{
-GMMasessment(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", MaxModes = 10, Seed)
+GMMasessment(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", MaxModes = 10, MaxCores = 28, Seed)
 }
 \arguments{
  \item{Data}{the data as a vector.}
@@ -14,6 +14,7 @@ GMMasessment(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", Max
  \item{KS}{perform a Kolmogorov-Smirnov test of the fit versus orginal distribution.}
  \item{Criterion}{criterion for mode number selection, likelihood ratio test LR, AIC or BIC.}
  \item{MaxModes}{the maximum number of modes to be tried.}
+ \item{MaxCores}{the maximum number of processor cores used under Unix.}
  \item{Seed}{seed parameter set internally.}
 }
 \value{

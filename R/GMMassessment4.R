@@ -8,7 +8,7 @@
 #' @importFrom stats dnorm median na.omit sd
 #' @importFrom DistributionOptimization DistributionOptimization
 GMMasessment <-
-  function(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", MaxModes = 10, Seed) {
+  function(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", MaxModes = 5, MaxCores = 28, Seed) {
     if (!hasArg("Data"))
       stop("GMMasessment: No data.")
     if (length(Data) < 2)
@@ -83,7 +83,7 @@ GMMasessment <-
       } else {
         num_workers <- detectCores()
       }
-      nProc <- min(num_workers - 1, MaxModes)
+      nProc <- min(num_workers - 1, MaxModes, MaxCores)
 
       #GMM fit using a genetic algorithm
       GMMfit <- mclapply(list.of.Modes[1:DOmcMaxModes], function(x) {
@@ -194,7 +194,7 @@ GMMasessment <-
           n = 1000
         )$Data
       Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-      KStest <- ks.test(x = GMMdata, y = Pred)
+      KStest <- suppressWarnings(ks.test(x = GMMdata, y = Pred))
     } else
       KStest <- NA
 

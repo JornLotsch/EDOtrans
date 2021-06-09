@@ -9,7 +9,7 @@
 #' @importFrom stats dnorm median na.omit sd ks.test
 #' @importFrom DistributionOptimization DistributionOptimization
 GMMasessment <-
-  function(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", MaxModes = 10, Seed) {
+  function(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", MaxModes = 10, MaxCores = 28, Seed) {
     if (!hasArg("Data"))
       stop("GMMasessment: No data.")
     if (length(Data) < 2)
@@ -60,7 +60,7 @@ GMMasessment <-
             n = 1000
           )$Data
         Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-        KSfirst <- ks.test(x = GMMdata, y = Pred)$statistic
+        KSfirst <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
 
         set.seed(ActualSeed)
         Pred <-
@@ -71,7 +71,7 @@ GMMasessment <-
             n = 1000
           )$Data
         Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-        KSmin <- ks.test(x = GMMdata, y = Pred)$statistic
+        KSmin <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
 
         if (KSfirst < KSmin)
           BestGMM <- firstBestGMM
@@ -122,7 +122,7 @@ GMMasessment <-
             n = 1000
           )$Data
         Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-        KSfirst <- ks.test(x = GMMdata, y = Pred)$statistic
+        KSfirst <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
 
         set.seed(ActualSeed)
         Pred <-
@@ -133,7 +133,7 @@ GMMasessment <-
             n = 1000
           )$Data
         Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-        KSmin <- ks.test(x = GMMdata, y = Pred)$statistic
+        KSmin <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
 
         if (KSfirst < KSmin)
           BestGMM <- firstBestGMM
@@ -160,7 +160,7 @@ GMMasessment <-
       } else {
         num_workers <- detectCores()
       }
-      nProc <- min(num_workers - 1, MaxModes)
+      nProc <- min(num_workers - 1, MaxModes, MaxCores)
 
       #GMM fit using a genetic algorithm
       GMMfit <- pbmclapply(list.of.Modes, function(x) {
@@ -260,7 +260,7 @@ GMMasessment <-
           n = 1000
         )$Data
       Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-      KStest <- ks.test(x = GMMdata, y = Pred)
+      KStest <- suppressWarnings(ks.test(x = GMMdata, y = Pred))
     } else
       KStest <- NA
 
