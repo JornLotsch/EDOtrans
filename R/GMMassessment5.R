@@ -53,23 +53,23 @@ GMMasessment <-
         require("twosamples")
         set.seed(ActualSeed)
         Pred <-
-          CreateGMM(
+          suppressWarnings(CreateGMM(
             Means = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 1],
             SDs = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 2],
             Weights = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 3],
             n = 1000
-          )$Data
+          )$Data)
         Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
         KSfirst <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
 
         set.seed(ActualSeed)
         Pred <-
-          CreateGMM(
+          suppressWarnings(CreateGMM(
             Means = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 1],
             SDs = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 2],
             Weights = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 3],
             n = 1000
-          )$Data
+          )$Data)
         Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
         KSmin <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
 
@@ -81,7 +81,6 @@ GMMasessment <-
         BestGMM <- firstBestGMM
       return(BestGMM)
     }
-
 
     idBestGMM_LR <- function(GMMdata, GMMfit) {
       LRi <- c(1, unlist(lapply(2:MaxModes, function(x) {
@@ -109,41 +108,33 @@ GMMasessment <-
         else
           break
       }
-      minBestGMM <- which.min(LR1)
-      if (LR1[minBestGMM] >= 0.05) minBestGMM <- firstBestGMM
+      BestGMM <- firstBestGMM
 
-      if (firstBestGMM != minBestGMM) {
-        set.seed(ActualSeed)
-        Pred <-
-          CreateGMM(
-            Means = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 1],
-            SDs = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 2],
-            Weights = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 3],
-            n = 1000
-          )$Data
-        Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-        KSfirst <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
+      if (length(which(LR1 < 0.05)) > 0) {
+        otherBestGMM <- which(LR1 < 0.05)
+        otherBestGMM <- otherBestGMM[otherBestGMM >= firstBestGMM]
+      } else {
+        otherBestGMM <- firstBestGMM
+      }
 
-        set.seed(ActualSeed)
-        Pred <-
-          CreateGMM(
-            Means = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 1],
-            SDs = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 2],
-            Weights = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 3],
-            n = 1000
-          )$Data
-        Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-        KSmin <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
-
-        if (KSfirst < KSmin)
-          BestGMM <- firstBestGMM
-        else
-          BestGMM <- minBestGMM
-      } else
-        BestGMM <- firstBestGMM
+      if (length(otherBestGMM) > 1) {
+        KS <- lapply(otherBestGMM, function(x) {
+          set.seed(ActualSeed)
+          Pred <-
+            suppressWarnings(CreateGMM(
+              Means = lapply(GMMfit, "[[", 2)[[x]][, 1],
+              SDs = lapply(GMMfit, "[[", 2)[[x]][, 2],
+              Weights = lapply(GMMfit, "[[", 2)[[x]][, 3],
+              n = 1000
+            )$Data)
+          Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
+          KSi <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
+          return(unlist(KSi))
+        })
+        BestGMM <- unitedBestGMM[which.min(unlist(KS))]
+      }
       return(BestGMM)
     }
-
 
     GMMdata <- Data
     MaxModes <- MaxModes

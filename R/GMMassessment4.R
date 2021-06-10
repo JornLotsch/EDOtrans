@@ -1,5 +1,5 @@
 #Analysis of a Gaussian mixture structure in the data
-#Statistical justification using likelihood ratio tests of GMM_M versus GMM_M-1
+#Statistical justification using likelihood ratio tests of GMM_M versus GMM_M-1, or AIC or BIC
 #' @importFrom ClusterR GMM
 #' @importFrom parallel detectCores mclapply
 #' @importFrom AdaptGauss InformationCriteria4GMM LikelihoodRatio4Mixtures

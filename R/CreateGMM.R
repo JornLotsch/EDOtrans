@@ -12,7 +12,6 @@ CreateGMM <- function(Means, SDs, Weights, n, Prob = FALSE) {
   if (sumWeights != 1) {
     Weights <- Weights / sumWeights
     warning("GMMInnerInterDistances: Weigthts changed to sum up to 1.", call. = FALSE)
-    warning(cat(Weights, sep = "\n"), call. = FALSE)
   }
 
   if (Prob == FALSE) {
