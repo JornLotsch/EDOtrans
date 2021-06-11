@@ -5,12 +5,13 @@
   The function creates a data set according to a Gaussian mixture.
 }
 \usage{
-CreateGMM(Means, SDs, Weights, n, Prob = FALSE)
+CreateGMM(Means, SDs, Weights, n = 1000, Prob = FALSE)
 }
 \arguments{
  \item{Means}{a list of means of the mixture modes.}
  \item{SDs}{a list of standard deviations of the mixture modes.}
  \item{Weights}{a list of weights of the mixture modes, has to add up to 1.}
+ \item{n}{number of data points.}
  \item{Prob}{whether a probability matrix should be calcuated.}
 }
 \value{

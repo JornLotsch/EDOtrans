@@ -6,14 +6,15 @@
 #' @importFrom AdaptGauss InformationCriteria4GMM LikelihoodRatio4Mixtures
 #' @importFrom grDevices nclass.FD
 #' @importFrom methods hasArg
-#' @importFrom stats dnorm median na.omit sd ks.test
+#' @importFrom utils tail
+#' @importFrom stats ks.test
 #' @importFrom DistributionOptimization DistributionOptimization
-GMMasessment <-
+GMMassessment <-
   function(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", MaxModes = 10, MaxCores = 28, Seed) {
     if (!hasArg("Data"))
-      stop("GMMasessment: No data.")
+      stop("GMMassessment: No data.")
     if (length(Data) < 2)
-      stop("GMMasessment: Too few data.")
+      stop("GMMassessment: Too few data.")
 
     if (!missing(Seed)) {
       ActualSeed <- Seed
@@ -260,6 +261,8 @@ GMMasessment <-
       GMMplotGG(Data = GMMdata, Means = Means, SDs = SDs, Weights = Weights, Hist = TRUE)
     if (PlotIt == TRUE)
       print(p1)
+
+    #Return results
     return(
       list(
         Cls = Classes,

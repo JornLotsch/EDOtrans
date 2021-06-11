@@ -8,12 +8,12 @@
 #' @importFrom methods hasArg
 #' @importFrom stats dnorm median na.omit sd
 #' @importFrom DistributionOptimization DistributionOptimization
-GMMasessment <-
+GMMassessment <-
   function(Data, DO = FALSE, PlotIt = FALSE, Criterion = "LR", MaxModes = 10, Seed) {
     if (!hasArg("Data"))
-      stop("GMMasessment: No data.")
+      stop("GMMassessment: No data.")
     if (length(Data) < 2)
-      stop("GMMasessment: Too few data.")
+      stop("GMMassessment: Too few data.")
 
     if (!missing(Seed)) {
       ActualSeed <- Seed

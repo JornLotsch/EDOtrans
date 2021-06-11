@@ -5,7 +5,7 @@
   The package provides the necessary functions for performing the EDO data transformation.
 }
 \usage{
-EDOtrans(Data, Cls, Means, SDs, Weights, DO = FALSE, PlotGMM = FALSE)
+EDOtrans(Data, Cls, Means, SDs, Weights, DO = FALSE, Criterion = "AIC", MaxModes = 5, MaxCores = 28, Seed, PlotGMM = FALSE)
 }
 \arguments{
  \item{Data}{the data as a vector.}
@@ -14,6 +14,10 @@ EDOtrans(Data, Cls, Means, SDs, Weights, DO = FALSE, PlotGMM = FALSE)
  \item{SDs}{a list of standard deviations for a Gaussian mixure.}
  \item{Weights}{a list of weights for a Gaussian mixure.}
  \item{DO}{whether to use the DistributionOptimization method for Gaussian mixture modeling.}
+ \item{Criterion}{criterion for mode number selection, likelihood ratio test LR, AIC or BIC.}
+ \item{MaxModes}{the maximum number of modes to be tried.}
+ \item{MaxCores}{the maximum number of processor cores used under Unix.}
+ \item{Seed}{seed parameter set internally.}
  \item{PlotGMM}{whether to plot the obtained Gaussian mixture model.}
 }
 \value{

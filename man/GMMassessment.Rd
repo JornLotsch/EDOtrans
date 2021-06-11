@@ -1,11 +1,11 @@
-\name{GMMasessment}
-\alias{GMMasessment}
+\name{GMMassessment}
+\alias{GMMassessment}
 \title{Gaussian mixture assessment}
 \description{
   The function fits a Gaussian mixture and determines the number of statistically supported modes.
 }
 \usage{
-GMMasessment(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", MaxModes = 10, MaxCores = 28, Seed)
+GMMassessment(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "AIC", MaxModes = 10, MaxCores = 28, Seed)
 }
 \arguments{
  \item{Data}{the data as a vector.}
@@ -37,8 +37,8 @@ GMMasessment(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", Max
 \examples{
 ## example 1
 data(iris)
-GMMasessment(Data = iris$Sepal.Length, DO = F, PlotIt = T, Criterion = "LR", MaxModes = 5, Seed = 42)
+GMMassessment(Data = iris$Sepal.Length, DO = F, PlotIt = T, Criterion = "LR", MaxModes = 5, Seed = 42)
 }
 \keyword{EDOtrans}
-\keyword{GMMasessment}
+\keyword{GMMassessment}
 \keyword{data visualization}
