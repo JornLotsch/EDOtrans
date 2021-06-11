@@ -3,7 +3,6 @@
 #' @importFrom AdaptGauss BayesDecisionBoundaries
 #' @importFrom methods hasArg
 #' @importFrom stats dnorm median na.omit sd
-#' @importFrom DistributionOptimization DistributionOptimization
 #' @export
 EDOtrans <-
   function(Data, Cls, Means, SDs, Weights, DO = FALSE, Criterion = "AIC", MaxModes = 5, MaxCores = 28, Seed, PlotGMM = FALSE) {
@@ -47,7 +46,7 @@ EDOtrans <-
         }
       } else {
         #Obtain classes via GMM
-        warning("EDOtrans: Classes created using Gaussian mixtures.",
+        warning("EDOtrans: Classes created using Gaussian mixture modeling.",
                 call. = FALSE)
         if (hasArg("DO") == TRUE)
           DO = DO
