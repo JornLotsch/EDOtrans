@@ -5,7 +5,8 @@
 #' @importFrom stats dnorm median na.omit sd
 #' @export
 EDOtrans <-
-  function(Data, Cls, Means, SDs, Weights, DO = FALSE, Criterion = "AIC", MaxModes = 5, MaxCores = 28, Seed, PlotGMM = FALSE) {
+  function(Data, Cls, Means, SDs, Weights, DO = FALSE, Criterion = "BIC", MaxModes = 5, MaxCores = 28, Seed, PlotGMM = FALSE)
+   {
     if (hasArg("Data") == FALSE)
       stop("EDOtrans: No data provided. Stopping.")
     is.integer0 <- function(x) {
