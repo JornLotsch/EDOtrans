@@ -9,10 +9,12 @@
 #' @importFrom methods hasArg
 #' @importFrom utils tail
 #' @importFrom stats ks.test
+#' @importFrom cluster clusGap pam
 #' @importFrom DistributionOptimization DistributionOptimization
 GMMassessment <-
   function(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "BIC",
-  Razor = TRUE, MaxModes = 10, MaxCores = 28, Seed) {
+           Razor = TRUE, Gap = FALSE, GapOnly = FALSE,
+           MaxModes = 8, MaxCores = 28, Seed) {
     if (!hasArg("Data"))
       stop("GMMassessment: No data.")
     if (length(Data) < 2)
@@ -33,7 +35,7 @@ GMMassessment <-
       is.integer(x) && length(x) == 0L
     }
 
-    idBestGMM_AICBIC <- function(GMMdata, GMMfit, Criterion) {
+    idBestGMM_AICBIC <- function(GMMdata, GMMfit, Criterion, ActualSeed) {
       AICBIC <- lapply(1:length(GMMfit), function(x) {
         AICBICi <- AdaptGauss::InformationCriteria4GMM(
           Data = GMMdata,
@@ -60,7 +62,7 @@ GMMassessment <-
             BestGMM <- i
           else
             break
-          }
+        }
       } else {
         firstBestGMM <- 1
         for (i in 2:length(GMMfit)) {
@@ -68,43 +70,45 @@ GMMassessment <-
             firstBestGMM <- i
           else
             break
-          }
+        }
         minBestGMM <- which.min(AICBIC)
         if (firstBestGMM != minBestGMM) {
           require("twosamples")
           set.seed(ActualSeed)
           Pred <-
-          suppressWarnings(CreateGMM(
-            Means = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 1],
-            SDs = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 2],
-            Weights = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 3],
-            n = n
-          )$Data)
+            suppressWarnings(CreateGMM(
+              Means = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 1],
+              SDs = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 2],
+              Weights = lapply(GMMfit, "[[", 2)[[firstBestGMM]][, 3],
+              n = n
+            )$Data)
           Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-          KSfirst <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
+          Chisqfirst <- suppressWarnings(chisq.test(x = sort(GMMdata),
+          y = sort(sample(Pred, length(GMMdata))))$statistic)
 
           set.seed(ActualSeed)
           Pred <-
-          suppressWarnings(CreateGMM(
-            Means = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 1],
-            SDs = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 2],
-            Weights = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 3],
-            n = n
-          )$Data)
+            suppressWarnings(CreateGMM(
+              Means = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 1],
+              SDs = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 2],
+              Weights = lapply(GMMfit, "[[", 2)[[minBestGMM]][, 3],
+              n = n
+            )$Data)
           Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-          KSmin <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
+          Chisqmin <- suppressWarnings(chisq.test(x = sort(GMMdata),
+          y = sort(sample(Pred, length(GMMdata))))$statistic)
 
-          if (KSfirst <= KSmin)
+          if (Chisqfirst <= Chisqmin)
             BestGMM <- firstBestGMM
           else
             BestGMM <- minBestGMM
-          } else
-            BestGMM <- firstBestGMM
-          }
+        } else
+          BestGMM <- firstBestGMM
+      }
       return(BestGMM)
     }
 
-    idBestGMM_LR <- function(GMMdata, GMMfit) {
+    idBestGMM_LR <- function(GMMdata, GMMfit, ActualSeed) {
       LRi <- c(1, unlist(lapply(2:MaxModes, function(x) {
         AdaptGauss::LikelihoodRatio4Mixtures(
           Data = GMMdata,
@@ -120,15 +124,15 @@ GMMassessment <-
             BestGMM <- i
           else
             break
-          }
+        }
       } else {
         LR1 <- c(1, unlist(lapply(2:MaxModes, function(x) {
           AdaptGauss::LikelihoodRatio4Mixtures(
-          Data = GMMdata,
-          NullMixture = lapply(GMMfit, "[[", 2)[[1]],
-          OneMixture = lapply(GMMfit, "[[", 2)[[x]],
-          PlotIt = FALSE
-        )$Pvalue
+            Data = GMMdata,
+            NullMixture = lapply(GMMfit, "[[", 2)[[1]],
+            OneMixture = lapply(GMMfit, "[[", 2)[[x]],
+            PlotIt = FALSE
+          )$Pvalue
         })))
 
         firstBestGMM <- 1
@@ -137,7 +141,7 @@ GMMassessment <-
             firstBestGMM <- i
           else
             break
-          }
+        }
         BestGMM <- firstBestGMM
 
         if (length(which(LR1 < 0.05)) > 0) {
@@ -148,23 +152,71 @@ GMMassessment <-
         }
 
         if (length(otherBestGMM) > 1) {
-          KS <- lapply(otherBestGMM, function(x) {
+          Chisq <- lapply(otherBestGMM, function(x) {
             set.seed(ActualSeed)
             Pred <-
-            suppressWarnings(CreateGMM(
-              Means = lapply(GMMfit, "[[", 2)[[x]][, 1],
-              SDs = lapply(GMMfit, "[[", 2)[[x]][, 2],
-              Weights = lapply(GMMfit, "[[", 2)[[x]][, 3],
-              n = n
-            )$Data)
+              suppressWarnings(CreateGMM(
+                Means = lapply(GMMfit, "[[", 2)[[x]][, 1],
+                SDs = lapply(GMMfit, "[[", 2)[[x]][, 2],
+                Weights = lapply(GMMfit, "[[", 2)[[x]][, 3],
+                n = n
+              )$Data)
             Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-            KSi <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
-            return(unlist(KSi))
+            Chisqi <- suppressWarnings(chisq.test(x = sort(GMMdata),
+            y = sort(sample(Pred, length(GMMdata))))$statistic)
+            return(unlist(Chisqi))
           })
-          BestGMM <- otherBestGMM[which.min(unlist(KS))]
+          BestGMM <- otherBestGMM[which.min(unlist(Chisq))]
         }
       }
       return(BestGMM)
+    }
+
+    IncludeGAP <- function(GMMdata, GMMfit, BestGMM, MaxModes, ActualSeed, GapOnly) {
+      pam1 <- function(x, k) {
+        list(cluster = pam(x, 3, metric = "euclidean", stand = FALSE, cluster.only = TRUE))
+      }
+
+      gsPam1 <- clusGap(cbind(GMMdata, GMMdata), FUN = pam1,
+                        K.max = MaxModes, B = 60, verbose = F, spaceH0 = "original")
+      GAPmodes <- which.max(gsPam1$Tab[, 4])
+
+      if (GapOnly == TRUE) {
+        BestGMM <- GAPmodes
+      } else {
+        if (GAPmodes != BestGMM) {
+          require("twosamples")
+          set.seed(ActualSeed)
+          Pred <-
+            suppressWarnings(CreateGMM(
+              Means = lapply(GMMfit, "[[", 2)[[BestGMM]][, 1],
+              SDs = lapply(GMMfit, "[[", 2)[[BestGMM]][, 2],
+              Weights = lapply(GMMfit, "[[", 2)[[BestGMM]][, 3],
+              n = n
+            )$Data)
+          Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
+          ChisqNoGAP <- suppressWarnings(chisq.test(x = sort(GMMdata),
+          y = sort(sample(Pred, length(GMMdata))))$statistic)
+
+          set.seed(ActualSeed)
+          Pred <-
+            suppressWarnings(CreateGMM(
+              Means = lapply(GMMfit, "[[", 2)[[GAPmodes]][, 1],
+              SDs = lapply(GMMfit, "[[", 2)[[GAPmodes]][, 2],
+              Weights = lapply(GMMfit, "[[", 2)[[GAPmodes]][, 3],
+              n = n
+            )$Data)
+          Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
+          ChisqGAP <- suppressWarnings(chisq.test(x = sort(GMMdata),
+          y = sort(sample(Pred, length(GMMdata))))$statistic)
+
+          if (ChisqNoGAP <= ChisqGAP)
+            BestGMM <- BestGMM
+          else
+            BestGMM <- GAPmodes
+        }
+        return(BestGMM)
+      }
     }
 
     GMMdata <- Data
@@ -243,14 +295,18 @@ GMMassessment <-
     #Identify best fit based on selected criterion
     switch(Criterion,
            BIC = {
-      BestGMM <- idBestGMM_AICBIC(GMMdata, GMMfit, Criterion)
+      BestGMM <- idBestGMM_AICBIC(GMMdata = GMMdata, GMMfit = GMMfit, Criterion = Criterion, ActualSeed = ActualSeed)
     },
            AIC = {
-      BestGMM <- idBestGMM_AICBIC(GMMdata, GMMfit, Criterion)
+      BestGMM <- idBestGMM_AICBIC(GMMdata = GMMdata, GMMfit = GMMfit, Criterion = Criterion, ActualSeed = ActualSeed)
     },
            LR = {
-      BestGMM <- idBestGMM_LR(GMMdata, GMMfit)
+      BestGMM <- idBestGMM_LR(GMMdata = GMMdata, GMMfit = GMMfit, ActualSeed = ActualSeed)
     })
+
+    #Consider GAP based number of modes
+    if (Gap == TRUE)
+      BestGMM <- IncludeGAP(GMMdata = GMMdata, GMMfit = GMMfit, BestGMM = BestGMM, MaxModes = MaxModes, ActualSeed = ActualSeed)
 
     if (DO == FALSE) {
       Means <- as.vector(GMMfit[[BestGMM]][[1]]$centroids)
@@ -275,7 +331,7 @@ GMMassessment <-
           Boundaries[Boundaries >= min(Means) & Boundaries <= max(Means)]
       if (length(Boundaries) > 0)
         ClassesB <- cutGMM(x = GMMdata, breaks = Boundaries)
-      }
+    }
 
     Classes <- rep(NA, length(DataOrigLength))
     Classes[DataOrignoNA] <- ClassesB
@@ -297,7 +353,7 @@ GMMassessment <-
     #Prepare plot
     p1 <-
       GMMplotGG(Data = GMMdata, Means = Means, SDs = SDs,
-      Weights = Weights, Hist = TRUE)
+                Weights = Weights, Hist = TRUE)
     if (PlotIt == TRUE)
       print(p1)
 
@@ -314,4 +370,3 @@ GMMassessment <-
       )
     )
   }
-

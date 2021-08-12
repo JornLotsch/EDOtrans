@@ -10,7 +10,8 @@
 #' @importFrom stats ks.test
 #' @importFrom DistributionOptimization DistributionOptimization
 GMMassessment <-
-  function(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "LR", MaxModes = 10, MaxCores = 28, Seed) {
+  function(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "BIC",
+           MaxModes = 10, MaxCores = 28, Seed) {
     if (!hasArg("Data"))
       stop("GMMassessment: No data.")
     if (length(Data) < 2)

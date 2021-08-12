@@ -73,7 +73,7 @@ GMMplotGG <- function(Data, Means, SDs, Weights, BayesBoundaries,
     breaks <- pretty(range(HistData), n = nclass.FD(HistData), min.n = 1)
     bwidth <- breaks[2] - breaks[1]
     p1 <- p1 + geom_histogram(data = data.frame(HistData), aes(x = HistData, .data$..density..),
-                              binwidth = bwidth, fill = "grey85", color = "grey95") + guides(fill = FALSE)
+                              binwidth = bwidth, fill = "grey85", color = "grey95") + guides(fill = "none")
   }
   p1 <- p1 + geom_line(data = DataDF_long, aes(x = x, y = .data$y, colour = .data$Curve)) + labs(x = "Data", y = "Probability density")
   if (Bounds == TRUE & length(Means0) > 1) {

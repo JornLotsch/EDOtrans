@@ -19,24 +19,25 @@ CreateGMM <- function(Means, SDs, Weights, n = 1000, Prob = FALSE) {
     DataDF <- cbind.data.frame(Data = unlist(lapply(GMMparamRO, function(x) {
       do.call(rnorm, as.list(x))
     })),
-      Cls = rep(1:length(Weights), unlist(lapply(GMMparamRO, "[[", 1))))
+    Cls = rep(1:length(Weights), unlist(lapply(GMMparamRO, "[[", 1))))
   } else {
     rangeX <- range(c(Means - 2 * SDs, Means + 2 * SDs))
     x <- seq(from = rangeX[1], to = rangeX[2], length.out = n)
     DataDF_wide <- data.frame(mapply(
-        function(w, mean, sd)
-          w * dnorm(x, mean, sd),
-        mean = Means,
-        sd = SDs,
-        w = Weights
-       ))
+      function(w, mean, sd)
+        w * dnorm(x, mean, sd),
+      mean = Means,
+      sd = SDs,
+      w = Weights
+    ))
     DataDF <- cbind.data.frame(
       Data = rep(x, length(Means)),
       Prob = as.vector(as.matrix(DataDF_wide)),
       Cls = rep(c(1:length(Means)), each = length(x))
     )
   }
+}
 
-  #Return results
-  return(DataDF)
+#Return results
+return(DataDF)
 }

@@ -12,7 +12,7 @@
 #' @importFrom DistributionOptimization DistributionOptimization
 GMMassessment <-
   function(Data, DO = FALSE, PlotIt = FALSE, KS = FALSE, Criterion = "BIC",
-  Razor = TRUE, MaxModes = 10, MaxCores = 28, Seed) {
+  Razor = TRUE, MaxModes = 8, MaxCores = 28, Seed) {
     if (!hasArg("Data"))
       stop("GMMassessment: No data.")
     if (length(Data) < 2)
@@ -23,7 +23,7 @@ GMMassessment <-
     Data <- as.vector(Data[DataOrignoNA])
     n <- ifelse(length(Data) < 1000, 1000, 2 * length(Data))
 
-    if (!missing(Seed)) {
+        if (!missing(Seed)) {
       ActualSeed <- Seed
     } else {
       ActualSeed <- tail(get(".Random.seed", envir = globalenv()), 1)
@@ -81,7 +81,7 @@ GMMassessment <-
             n = n
           )$Data)
           Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-          KSfirst <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
+          Chisqfirst <- suppressWarnings(chisq.test(x = sort(GMMdata), y = sort(sample(Pred, length(GMMdata))))$statistic)
 
           set.seed(ActualSeed)
           Pred <-
@@ -92,9 +92,9 @@ GMMassessment <-
             n = n
           )$Data)
           Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-          KSmin <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
+          Chisqmin <- suppressWarnings(chisq.test(x = sort(GMMdata), y = sort(sample(Pred, length(GMMdata))))$statistic)
 
-          if (KSfirst <= KSmin)
+          if (Chisqfirst <= Chisqmin)
             BestGMM <- firstBestGMM
           else
             BestGMM <- minBestGMM
@@ -148,7 +148,7 @@ GMMassessment <-
         }
 
         if (length(otherBestGMM) > 1) {
-          KS <- lapply(otherBestGMM, function(x) {
+          Chisq <- lapply(otherBestGMM, function(x) {
             set.seed(ActualSeed)
             Pred <-
             suppressWarnings(CreateGMM(
@@ -158,10 +158,10 @@ GMMassessment <-
               n = n
             )$Data)
             Pred <- Pred[Pred >= min(GMMdata) & Pred <= max(GMMdata)]
-            KSi <- suppressWarnings(ks.test(x = GMMdata, y = Pred)$statistic)
-            return(unlist(KSi))
+            Chisqi <- suppressWarnings(chisq.test(x = sort(GMMdata), y = sort(sample(Pred, length(GMMdata))))$statistic)
+            return(unlist(Chisqi))
           })
-          BestGMM <- otherBestGMM[which.min(unlist(KS))]
+          BestGMM <- otherBestGMM[which.min(unlist(Chisq))]
         }
       }
       return(BestGMM)
