@@ -64,6 +64,5 @@ EDOtrans <- function(Data, Cls, PlotIt = FALSE, FitAlg = "normalmixEM", Criterio
   # Perform EDO transformation
   DataEDOtrans <- Data/SDdomSq
 
-  # Return results
   return(list(DataEDO = DataEDOtrans, EDOfactor = SDdomSq, Cls = Cls))
 }
