@@ -5,7 +5,7 @@
 #' @importFrom opGMMassessment opGMMassessment
 #' @export
 EDOtrans <- function(Data, Cls, PlotIt = FALSE, FitAlg = "normalmixEM", Criterion = "LR",
-  MaxModes = 8, MaxCores = 2048, Seed) {
+  MaxModes = 8, MaxCores = getOption("mc.cores", 2L), Seed) {
   if (hasArg("Data") == FALSE) {
     stop("EDOtrans: No data provided. Stopping.")
   }
