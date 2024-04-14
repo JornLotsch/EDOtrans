@@ -1,6 +1,6 @@
 export(EDOtrans)
 importFrom(methods, hasArg, is)
-importFrom(stats, dnorm, median, sd)
-importFrom(utils, tail) 
+importFrom(stats, dnorm, median, sd, runif)
+importFrom(utils, tail)
 importFrom(ABCanalysis, ABCanalysis)
 importFrom(opGMMassessment, opGMMassessment, GMMplotGG)

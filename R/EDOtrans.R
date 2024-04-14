@@ -1,48 +1,50 @@
 # Performs EDO transformation on given data and classes
 #' @importFrom ABCanalysis ABCanalysis
 #' @importFrom methods hasArg
-#' @importFrom stats median sd
+#' @importFrom stats median sd runif
 #' @importFrom opGMMassessment opGMMassessment
 #' @export
 EDOtrans <- function(Data, Cls, PlotIt = FALSE, FitAlg = "normalmixEM", Criterion = "LR",
-  MaxModes = 8, MaxCores = getOption("mc.cores", 2L), Seed) {
-  if (hasArg("Data") == FALSE) {
+                     MaxModes = 8, MaxCores = getOption("mc.cores", 2L), Seed) {
+  # Check if data is provided
+  if (!hasArg("Data")) {
     stop("EDOtrans: No data provided. Stopping.")
   }
 
+  # Define a helper function to check if a vector is an empty integer vector
   is.integer0 <- function(x) {
     is.integer(x) && length(x) == 0L
   }
 
-  if (!missing(Seed)) {
-    ActualSeed <- Seed
+  # Set the seed if provided, otherwise use the current seed
+  if (missing(Seed)) {
+    ActualSeed <- as.integer(get_seed()[1])
   } else {
-    ActualSeed <- tail(get(".Random.seed", envir = globalenv()), 1)
+    ActualSeed <- Seed
   }
 
-  # Main part If classes are specified, transformation is done based on the
-  # classes, otherwise the modality is checked automatically.
-  if (hasArg("Cls") == TRUE) {
+  # Determine the means, standard deviations, and weights based on the provided classes
+  if (hasArg("Cls")) {
     if (length(Cls) != length(Data)) {
-      stop("EDOtrans: Classes provided but unequal legths of Data and Cls.")
+      stop("EDOtrans: Classes provided but unequal lengths of Data and Cls.")
     } else {
-      Means0 <- tapply(X = Data, INDEX = Cls, FUN = mean)
-      SDs0 <- tapply(X = Data, INDEX = Cls, FUN = sd)
-      Weights0 <- tapply(X = Data, INDEX = Cls, function(x) length(x)/length(Data))
+      Means0 <- tapply(Data, Cls, mean)
+      SDs0 <- tapply(Data, Cls, sd)
+      Weights0 <- tapply(Data, Cls, function(x) length(x) / length(Data))
     }
   } else {
     # Obtain classes via opGMMassessment
     warning("EDOtrans: Classes created using Gaussian mixture modeling.", call. = FALSE)
     GMMresults <- opGMMassessment(Data = Data, FitAlg = FitAlg, Criterion = Criterion,
-      MaxModes = MaxModes, MaxCores = MaxCores, PlotIt = PlotIt, KS = FALSE,
-      Seed = ActualSeed)
+                                  MaxModes = MaxModes, MaxCores = MaxCores, PlotIt = PlotIt, KS = FALSE,
+                                  Seed = ActualSeed)
     Cls <- GMMresults$Cls
     Means0 <- GMMresults$Means
     SDs0 <- GMMresults$SDs
     Weights0 <- GMMresults$Weights
   }
 
-  # Selection of dominant groups
+  # Select the dominant groups
   if (length(Weights0) > 1) {
     WeightsABC <- ABCanalysis::ABCanalysis(as.vector(Weights0))
     if (is.integer0(WeightsABC$Aind) == FALSE) {
@@ -52,17 +54,17 @@ EDOtrans <- function(Data, Cls, PlotIt = FALSE, FitAlg = "normalmixEM", Criterio
       # Combine standard deviations from dominant groups
       nDom <- sum(Weights0) * length(Data)
       CombinedDominatGroupsParameters <- combinedModesParameters(Means = Means0,
-        SDs = SDs0, Weights = Weights0, n = nDom)
+                                                                 SDs = SDs0, Weights = Weights0, n = nDom)
       SDdomSq <- CombinedDominatGroupsParameters$SD * sqrt(2)
     } else {
-      SDdomSq <- median(SDs0) * sqrt(2)
+      SDdomSq <- stats::median(SDs0) * sqrt(2)
     }
   } else {
     SDdomSq <- SDs0 * sqrt(2)
   }
 
-  # Perform EDO transformation
-  DataEDOtrans <- Data/SDdomSq
+  # Perform the EDO transformation
+  DataEDOtrans <- Data / SDdomSq
 
   return(list(DataEDO = DataEDOtrans, EDOfactor = SDdomSq, Cls = Cls))
 }
