@@ -1,7 +1,4 @@
-citHeader("To cite EDOtrans in publications use:")
-
-citEntry(
-  entry    = "Article",
+bibentry(bibtype    = "Article",
   title = "Euclidean distance-optimized data transformation for cluster analysis in biomedical data (EDOtrans)",
   journal = "BMC Bioinformatics",
   volume = "23",
