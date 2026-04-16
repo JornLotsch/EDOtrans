@@ -16,3 +16,5 @@
 .*\.RData$
 -*\.tar.gz$
 .gitignore
+.*\.md
+

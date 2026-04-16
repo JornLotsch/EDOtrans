@@ -8,10 +8,25 @@ EDOtrans <- function(Data, Cls, PlotIt = FALSE, FitAlg = "normalmixEM", Criterio
                      MaxModes = 8, MaxCores = getOption("mc.cores", 2L), Seed = "simple") {
 
   # Check Data input
+
+  DIM <- function(...) {
+    args <- list(...)
+    unlist(lapply(args, function(x) {
+      if (is.null(dim(x))) {
+        return(1)
+      }
+      dim(x)[2]
+    }))
+  }
+
+
   if (missing(Data)) stop("EDOtrans: No data provided. Stopping.")
   if (length(Data) == 0) stop("EDOtrans: Data is empty.")
-  if (is.matrix(Data) || is.data.frame(Data)) {
-    stop("EDOtrans: Data must be a 1D vector, not a matrix or data frame.")
+  if (DIM(Data) != 1 || is.numeric(Data) == FALSE) {
+    stop("EDOtrans: Data must be a one-dimensional numerical vector.")
+  }
+  if (length(Data) < 2) {
+    stop("EDOtrans: Too few data.")
   }
   if (is.factor(Data)) Data <- as.character(Data)
   if (is.numeric(Data)) {
@@ -37,7 +52,7 @@ EDOtrans <- function(Data, Cls, PlotIt = FALSE, FitAlg = "normalmixEM", Criterio
     warning("EDOtrans: Invalid FitAlg '", FitAlg, "', using 'normalmixEM'.", call. = FALSE)
     FitAlg <- "normalmixEM"
   }
-  if (!Criterion %in%  c("AIC", "BIC", "FM", "GAP", "LR", "NbClust", "SI")) {
+  if (!Criterion %in% c("AIC", "BIC", "FM", "GAP", "LR", "NbClust", "SI")) {
     warning("EDOtrans: Invalid Criterion '", Criterion, "', using 'LR'.", call. = FALSE)
     Criterion <- "LR"
   }
@@ -53,12 +68,13 @@ EDOtrans <- function(Data, Cls, PlotIt = FALSE, FitAlg = "normalmixEM", Criterio
       set.seed(ActualSeed)
     } else if (is.character(Seed)) {
       ActualSeed <- switch(Seed,
-                           "auto" = as.integer(get_seed()),           # Complex seed recovery
-                           "simple" = {                               # Simple reproducible seed (default)
-                             temp_seed <- sample(1:100000, 1)
-                             warning(paste0("EDOtrans: Seed set at ", temp_seed, "."), call. = FALSE)
-                             temp_seed
-                           },
+                           "auto" = as.integer(get_seed()), # Complex seed recovery
+                           "simple" = {
+        # Simple reproducible seed (default)
+        temp_seed <- sample(1:100000, 1)
+        warning(paste0("EDOtrans: Seed set at ", temp_seed, "."), call. = FALSE)
+        temp_seed
+      },
                            stop("Invalid Seed input. Use 'auto', 'simple', or an integer.")
       )
     } else {
@@ -69,13 +85,13 @@ EDOtrans <- function(Data, Cls, PlotIt = FALSE, FitAlg = "normalmixEM", Criterio
 
   # Main part If classes are specified, transformation is done based on the
   # classes, otherwise the modality is checked automatically.
-  if  (!missing(Cls) && !is.null(Cls)) {
+  if (!missing(Cls) && !is.null(Cls)) {
     if (length(Cls) != length(Data)) {
       stop("EDOtrans: Classes provided but unequal lengths of Data and Cls.")
     } else {
       Means0 <- tapply(X = Data, INDEX = Cls, function(x) mean(x, na.rm = TRUE))
       SDs0 <- tapply(X = Data, INDEX = Cls, function(x) sd(x, na.rm = TRUE))
-      Weights0 <- tapply(X = Data, INDEX = Cls, function(x) length(x)/length(Data))
+      Weights0 <- tapply(X = Data, INDEX = Cls, function(x) length(x) / length(Data))
       # Check for empty classes
       if (any(is.na(Means0)) || any(is.na(SDs0))) {
         stop("EDOtrans: Some classes have no data or only NA values.")
@@ -135,7 +151,7 @@ EDOtrans <- function(Data, Cls, PlotIt = FALSE, FitAlg = "normalmixEM", Criterio
   if (is.na(SDdomSq) || SDdomSq <= 0) {
     stop("EDOtrans: invalid scaling factor computed.")
   } else {
-    DataEDOtrans <- Data/SDdomSq
+    DataEDOtrans <- Data / SDdomSq
   }
 
   return(list(DataEDO = DataEDOtrans, EDOfactor = SDdomSq, Cls = Cls))
