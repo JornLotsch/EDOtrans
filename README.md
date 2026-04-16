@@ -51,3 +51,5 @@ License: GPL-3
 ## Related links
 
 - [CRAN package page](https://cran.r-project.org/package=EDOtrans) 
+
+- [imports cABC analysis R package](https://github.com/AndreHDev/cABC_Analysis) 

@@ -9,7 +9,7 @@ EDOtrans(Data, Cls, PlotIt = FALSE, FitAlg = "normalmixEM", Criterion = "LR",
                      MaxModes = 8, MaxCores = getOption("mc.cores", 2L), Seed = "simple")
 }
 \arguments{
- \item{Data}{the data as a vector.}
+ \item{Data}{the data as a numerical vector (1D).}
  \item{Cls}{the class information, if any, as a vector of similar length as instances in the data.}
  \item{PlotIt}{whether to plot the fit directly.}
  \item{FitAlg}{which fit algorithm to use: "ClusterRGMM" = GMM from ClusterR,

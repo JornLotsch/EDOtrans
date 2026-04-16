@@ -10,6 +10,9 @@ EDOtrans <- function(Data, Cls, PlotIt = FALSE, FitAlg = "normalmixEM", Criterio
   # Check Data input
   if (missing(Data)) stop("EDOtrans: No data provided. Stopping.")
   if (length(Data) == 0) stop("EDOtrans: Data is empty.")
+  if (is.matrix(Data) || is.data.frame(Data)) {
+    stop("EDOtrans: Data must be a 1D vector, not a matrix or data frame.")
+  }
   if (is.factor(Data)) Data <- as.character(Data)
   if (is.numeric(Data)) {
     Data <- as.numeric(Data)
@@ -52,7 +55,7 @@ EDOtrans <- function(Data, Cls, PlotIt = FALSE, FitAlg = "normalmixEM", Criterio
       ActualSeed <- switch(Seed,
                            "auto" = as.integer(get_seed()),           # Complex seed recovery
                            "simple" = {                               # Simple reproducible seed (default)
-                             temp_seed <- sample(1:100, 1)
+                             temp_seed <- sample(1:100000, 1)
                              warning(paste0("EDOtrans: Seed set at ", temp_seed, "."), call. = FALSE)
                              temp_seed
                            },
