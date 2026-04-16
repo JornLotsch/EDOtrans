@@ -1,6 +1,13 @@
+useDynLib(EDOtrans, .registration=TRUE)
 export(EDOtrans)
+export(get_seed)
 importFrom(methods, hasArg, is)
 importFrom(stats, dnorm, median, sd, runif)
 importFrom(utils, tail)
 importFrom(ABCanalysis, ABCanalysis)
 importFrom(opGMMassessment, opGMMassessment, GMMplotGG)
+<<<<<<< HEAD
+=======
+importFrom(Rcpp, evalCpp)
+
+>>>>>>> 8c002aa (get_seed new, error handling improved)

@@ -1,0 +1,19 @@
+citHeader("To cite EDOtrans in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title = "Euclidean distance-optimized data transformation for cluster analysis in biomedical data (EDOtrans)",
+  journal = "BMC Bioinformatics",
+  volume = "23",
+  pages = "233",
+  year = "2022",
+  issn = "2352-9148",
+  doi = "10.1186/s12859-022-04769-w",
+  url = "https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04769-w",
+  author = "Alfred Ultsch and Jörn Lötsch",
+  textVersion = paste("Alfred Ultsch and Jörn Lötsch.",
+    "Euclidean distance-optimized data transformation for cluster analysis in biomedical data (EDOtrans).",
+    "BMC Bioinformatics",
+    "https://doi.org/10.1186/s12859-022-04769-w",
+    "https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04769-w")
+)
