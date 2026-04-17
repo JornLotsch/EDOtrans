@@ -2,7 +2,16 @@ Package: EDOtrans
 Type: Package
 Title: Euclidean Distance-Optimized Data Transformation
 Version: 0.3
-Author: Jorn Lotsch[aut,cre], Alfred Ultsch[aut]
+Authors@R: c(
+    person(given = "Jorn",
+           family = "Lotsch",
+           role = c("aut", "cre"),
+           email = "j.lotsch@em.uni-frankfurt.de",
+           comment = c(ORCID = "0000-0002-5818-6958")),
+    person(given = "Alfred",
+           family = "Ultsch",
+           role = c("aut"),
+           email = ""))
 Maintainer: Jorn Lotsch <j.lotsch@em.uni-frankfurt.de>
 Description: A data transformation method which takes into account the special property of scale non-invariance with a breakpoint at 1 of the Euclidean distance.
 License: GPL-3

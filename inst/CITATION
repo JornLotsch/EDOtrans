@@ -6,11 +6,11 @@ bibentry(bibtype    = "Article",
   year = "2022",
   issn = "2352-9148",
   doi = "10.1186/s12859-022-04769-w",
-  url = "https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04769-w",
+  url = "https://link.springer.com/article/10.1186/s12859-022-04769-w",
   author = "Alfred Ultsch and Jörn Lötsch",
   textVersion = paste("Alfred Ultsch and Jörn Lötsch.",
     "Euclidean distance-optimized data transformation for cluster analysis in biomedical data (EDOtrans).",
     "BMC Bioinformatics",
     "https://doi.org/10.1186/s12859-022-04769-w",
-    "https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04769-w")
+    "https://link.springer.com/article/10.1186/s12859-022-04769-w")
 )
